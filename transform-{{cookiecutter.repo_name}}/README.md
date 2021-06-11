@@ -15,7 +15,7 @@ TODO
 
 ### Usage
 ```sh
-$ python -m transform_{{cookiecutter.system_name}}.transform [--ingresss_time %Y-%m-%dT%H']
+$ python -m transform_{{cookiecutter.module_name}}.transform [--ingresss_time %Y-%m-%dT%H']
 ```
 
 ## Configuration
@@ -23,7 +23,7 @@ $ python -m transform_{{cookiecutter.system_name}}.transform [--ingresss_time %Y
 The application needs a configuration file `conf.ini` (see `conf.example.ini`) and a credentials file `credentials.ini`
 (see `credentials.example.ini`). The configuration file must 
 be placed in the root of the project or in the locations `/etc/osiris/conf.ini` or 
-`/etc/transform-ingress2event-time-conf.ini`. 
+`/etc/transform-{{cookiecutter.repo_name}}-conf.ini`. 
 
 ```
 [Logging]
