@@ -12,7 +12,7 @@ from osiris.pipelines.azure_data_storage import DataSets
 from osiris.pipelines.file_io_connector import DatalakeFileSource
 
 
-class Transform{{cookiecutter._class_name}}:
+class Transform{{cookiecutter.class_name}}:
     """
     TODO: add appropriate docstring
     """
