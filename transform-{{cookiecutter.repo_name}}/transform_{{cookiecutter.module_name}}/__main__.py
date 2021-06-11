@@ -8,7 +8,7 @@ from datetime import datetime
 from osiris.core.configuration import ConfigurationWithCredentials
 from osiris.core.enums import TimeResolution
 
-from .transform import Transform{{cookiecutter.class_name}}
+from .transform import Transform{{cookiecutter._class_name}}
 
 configuration = ConfigurationWithCredentials(__file__)
 config = configuration.get_config()
@@ -24,7 +24,7 @@ def __init_argparse() -> argparse.ArgumentParser:
     return parser
 
 
-def __get_pipeline() -> Transform{{cookiecutter.class_name}}:
+def __get_pipeline() -> Transform{{cookiecutter._class_name}}:
     account_url = config['Azure Storage']['account_url']
     filesystem_name = config['Azure Storage']['filesystem_name']
 
@@ -38,7 +38,7 @@ def __get_pipeline() -> Transform{{cookiecutter.class_name}}:
     max_files = int(config['Pipeline']['max_files'])
 
     try:
-        return Transform{{cookiecutter.class_name}}(storage_account_url=account_url,
+        return Transform{{cookiecutter._class_name}}(storage_account_url=account_url,
                                filesystem_name=filesystem_name,
                                tenant_id=tenant_id,
                                client_id=client_id,
