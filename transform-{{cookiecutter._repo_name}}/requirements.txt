@@ -1,2 +1,0 @@
-osiris-sdk
-apache-beam
