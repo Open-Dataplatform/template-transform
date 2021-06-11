@@ -59,7 +59,7 @@ def main():
     argparser = __init_argparse()
     args, _ = argparser.parse_known_args()
     pipeline = __get_pipeline()
-    logger.info('Running the {{cookiecutter.system_name}} transformation.')
+    logger.info('Running the {{cookiecutter.name}} transformation.')
     try:
         if args.ingress_time and args.ingress_time != '':
             ingress_time = datetime.strptime(args.ingress_time, '%Y-%m-%dT%H')
@@ -70,7 +70,7 @@ def main():
         logger.error('Error occurred while running pipeline: %s', error)
         sys.exit(-1)
 
-    logger.info('Finished running the {{cookiecutter.system_name}} transformation.')
+    logger.info('Finished running the {{cookiecutter.name}} transformation.')
 
 
 if __name__ == '__main__':
