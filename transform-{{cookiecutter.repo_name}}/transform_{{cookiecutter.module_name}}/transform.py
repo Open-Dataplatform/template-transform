@@ -10,6 +10,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 from osiris.core.enums import TimeResolution
 from osiris.pipelines.azure_data_storage import DataSets
 from osiris.pipelines.file_io_connector import DatalakeFileSource
+from osiris.core.azure_client_authorization import ClientAuthorization
 
 
 class Transform{{cookiecutter.class_name}}:
@@ -51,9 +52,11 @@ class Transform{{cookiecutter.class_name}}:
         TODO: add appropriate docstring
         """
 
-        datasets = DataSets(tenant_id=self.tenant_id,
-                            client_id=self.client_id,
-                            client_secret=self.client_secret,
+        client_auth = ClientAuthorization(tenant_id=self.tenant_id,
+                                          client_id=self.client_id,
+                                          client_secret=self.client_secret)
+
+        datasets = DataSets(client_auth=client_auth,
                             account_url=self.storage_account_url,
                             filesystem_name=self.filesystem_name,
                             source=self.source_dataset_guid,
@@ -62,9 +65,7 @@ class Transform{{cookiecutter.class_name}}:
 
         while True:
 
-            datalake_connector = DatalakeFileSource(tenant_id=self.tenant_id,
-                                                    client_id=self.client_id,
-                                                    client_secret=self.client_secret,
+            datalake_connector = DatalakeFileSource(client_auth=client_auth.get_local_copy(),
                                                     account_url=self.storage_account_url,
                                                     filesystem_name=self.filesystem_name,
                                                     guid=self.source_dataset_guid,
