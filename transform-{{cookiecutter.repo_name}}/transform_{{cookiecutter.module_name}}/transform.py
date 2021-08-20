@@ -8,7 +8,7 @@ import apache_beam.transforms.core as beam_core
 from apache_beam.options.pipeline_options import PipelineOptions
 
 from osiris.core.enums import TimeResolution
-from osiris.pipelines.azure_data_storage import DataSets
+from osiris.pipelines.azure_data_storage import Dataset
 from osiris.pipelines.file_io_connector import DatalakeFileSource
 from osiris.core.azure_client_authorization import ClientAuthorization
 
@@ -56,12 +56,10 @@ class Transform{{cookiecutter.class_name}}:
                                           client_id=self.client_id,
                                           client_secret=self.client_secret)
 
-        datasets = DataSets(client_auth=client_auth,
-                            account_url=self.storage_account_url,
-                            filesystem_name=self.filesystem_name,
-                            source=self.source_dataset_guid,
-                            destination=self.destination_dataset_guid,
-                            time_resolution=self.time_resolution)
+        dataset = Dataset(client_auth=client_auth,
+                          account_url=self.storage_account_url,
+                          filesystem_name=self.filesystem_name,
+                          guid=self.destination_dataset_guid)
 
         while True:
 
