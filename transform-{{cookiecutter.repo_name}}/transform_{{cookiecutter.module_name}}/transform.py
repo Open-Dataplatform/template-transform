@@ -68,10 +68,7 @@ class Transform{{cookiecutter.class_name}}:
 
         while True:
 
-            file_batch_controller = FileBatchController(client_auth=client_auth.get_local_copy(),
-                                                        account_url=self.storage_account_url,
-                                                        filesystem_name=self.filesystem_name,
-                                                        guid=self.source_dataset_guid,
+            file_batch_controller = FileBatchController(dataset=dataset_source,
                                                         ingest_time=ingest_time,
                                                         max_files=self.max_files)
 
