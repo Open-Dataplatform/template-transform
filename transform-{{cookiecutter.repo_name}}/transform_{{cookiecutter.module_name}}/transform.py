@@ -9,7 +9,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 
 from osiris.core.enums import TimeResolution
 from osiris.pipelines.azure_data_storage import Dataset
-from osiris.pipelines.file_io_connector import DatalakeFileSource
+from osiris.pipelines.file_io_connector import DatalakeFileSource, FileBatchController
 from osiris.core.azure_client_authorization import ClientAuthorization
 
 
@@ -56,19 +56,27 @@ class Transform{{cookiecutter.class_name}}:
                                           client_id=self.client_id,
                                           client_secret=self.client_secret)
 
-        dataset = Dataset(client_auth=client_auth,
-                          account_url=self.storage_account_url,
-                          filesystem_name=self.filesystem_name,
-                          guid=self.destination_dataset_guid)
+        dataset_source = Dataset(client_auth=client_auth.get_local_copy(),
+                                 account_url=self.storage_account_url,
+                                 filesystem_name=self.filesystem_name,
+                                 guid=self.source_dataset_guid)
+
+        dataset_destination = Dataset(client_auth=client_auth,
+                                      account_url=self.storage_account_url,
+                                      filesystem_name=self.filesystem_name,
+                                      guid=self.destination_dataset_guid)
 
         while True:
 
-            datalake_connector = DatalakeFileSource(client_auth=client_auth.get_local_copy(),
-                                                    account_url=self.storage_account_url,
-                                                    filesystem_name=self.filesystem_name,
-                                                    guid=self.source_dataset_guid,
-                                                    ingest_time=ingest_time,
-                                                    max_files=self.max_files)
+            file_batch_controller = FileBatchController(client_auth=client_auth.get_local_copy(),
+                                                        account_url=self.storage_account_url,
+                                                        filesystem_name=self.filesystem_name,
+                                                        guid=self.source_dataset_guid,
+                                                        ingest_time=ingest_time,
+                                                        max_files=self.max_files)
+
+            datalake_connector = DatalakeFileSource(dataset=dataset_source,
+                                                    file_paths=file_batch_controller.get_batch())
 
             if datalake_connector.estimate_size() == 0:
                 break
@@ -81,7 +89,7 @@ class Transform{{cookiecutter.class_name}}:
                         # TODO: Implement rest of the pipeline
                 )
 
-            datalake_connector.close()
+            file_batch_controller.save_state()
 
             if ingest_time:
                 break
