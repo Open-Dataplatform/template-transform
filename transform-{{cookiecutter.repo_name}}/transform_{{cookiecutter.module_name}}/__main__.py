@@ -7,6 +7,7 @@ from datetime import datetime
 
 from osiris.core.configuration import ConfigurationWithCredentials
 from osiris.core.enums import TimeResolution
+from osiris.core.io import PrometheusClient
 
 from .transform import Transform{{cookiecutter.class_name}}
 
@@ -37,6 +38,13 @@ def __get_pipeline() -> Transform{{cookiecutter.class_name}}:
     time_resolution = TimeResolution[config['Datasets']['time_resolution']]
     max_files = int(config['Pipeline']['max_files'])
 
+    prometheus_hostname = config['Prometheus']['hostname']
+    prometheus_environment = config['Prometheus']['environment']
+    prometheus_name = config['Prometheus']['name']
+    prometheus_client = PrometheusClient(environment=prometheus_environment,
+                                         name=prometheus_name,
+                                         hostname=prometheus_hostname)
+
     try:
         return Transform{{cookiecutter.class_name}}(storage_account_url=account_url,
                                filesystem_name=filesystem_name,
@@ -46,7 +54,8 @@ def __get_pipeline() -> Transform{{cookiecutter.class_name}}:
                                source_dataset_guid=source,
                                destination_dataset_guid=destination,
                                time_resolution=time_resolution,
-                               max_files=max_files)
+                               max_files=max_files,
+                               prometheus_client=prometheus_client)
     except Exception as error:  # noqa pylint: disable=broad-except
         logger.error('Error occurred while initializing pipeline: %s', error)
         sys.exit(-1)

@@ -11,6 +11,7 @@ from osiris.core.enums import TimeResolution
 from osiris.pipelines.azure_data_storage import Dataset
 from osiris.pipelines.file_io_connector import DatalakeFileSource, FileBatchController
 from osiris.core.azure_client_authorization import ClientAuthorization
+from osiris.core.io import PrometheusClient
 
 
 class Transform{{cookiecutter.class_name}}:
@@ -21,7 +22,8 @@ class Transform{{cookiecutter.class_name}}:
     # pylint: disable=too-many-arguments, too-many-instance-attributes, too-few-public-methods
     def __init__(self, storage_account_url: str, filesystem_name: str, tenant_id: str, client_id: str,
                  client_secret: str, source_dataset_guid: str, destination_dataset_guid: str,
-                 time_resolution: TimeResolution, max_files: int):
+                 time_resolution: TimeResolution, max_files: int,
+                 prometheus_client: PrometheusClient):
         """
         :param storage_account_url: The URL to Azure storage account.
         :param filesystem_name: The name of the filesystem.
@@ -32,7 +34,8 @@ class Transform{{cookiecutter.class_name}}:
         :param destination_dataset_guid: The GUID for the destination dataset.
         :param time_resolution: The time resolution to store the data in the destination dataset with.
         :param max_files: Number of files to process in every pipeline run.
-        """
+        :param prometheus_client: Prometheus Client to generate metrics
+       """
         if None in [storage_account_url, filesystem_name, tenant_id, client_id, client_secret, source_dataset_guid,
                     destination_dataset_guid, time_resolution, max_files]:
             raise TypeError
@@ -46,6 +49,7 @@ class Transform{{cookiecutter.class_name}}:
         self.destination_dataset_guid = destination_dataset_guid
         self.time_resolution = time_resolution
         self.max_files = max_files
+        self.prometheus_client = prometheus_client
 
     def transform(self, ingest_time: datetime = None):
         """
@@ -59,12 +63,14 @@ class Transform{{cookiecutter.class_name}}:
         dataset_source = Dataset(client_auth=client_auth.get_local_copy(),
                                  account_url=self.storage_account_url,
                                  filesystem_name=self.filesystem_name,
-                                 guid=self.source_dataset_guid)
+                                 guid=self.source_dataset_guid,
+                                 prometheus_client=self.prometheus_client)
 
         dataset_destination = Dataset(client_auth=client_auth,
                                       account_url=self.storage_account_url,
                                       filesystem_name=self.filesystem_name,
-                                      guid=self.destination_dataset_guid)
+                                      guid=self.destination_dataset_guid,
+                                      prometheus_client=self.prometheus_client)
 
         while True:
 
