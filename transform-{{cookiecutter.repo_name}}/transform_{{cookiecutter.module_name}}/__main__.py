@@ -1,9 +1,7 @@
 """
 TODO: add appropriate docstring
 """
-import argparse
 import sys
-from datetime import datetime
 
 from osiris.core.configuration import ConfigurationWithCredentials
 from osiris.core.enums import TimeResolution
@@ -15,14 +13,6 @@ configuration = ConfigurationWithCredentials(__file__)
 config = configuration.get_config()
 credentials_config = configuration.get_credentials_config()
 logger = configuration.get_logger()
-
-
-def __init_argparse() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description='TODO: add description')
-
-    parser.add_argument('--ingress_time', type=str, default=None, help='the ingress time to start the ingress from.')
-
-    return parser
 
 
 def __get_pipeline() -> Transform{{cookiecutter.class_name}}:
@@ -65,16 +55,10 @@ def main():
     """
     The main function which runs the transformation.
     """
-    argparser = __init_argparse()
-    args, _ = argparser.parse_known_args()
     pipeline = __get_pipeline()
     logger.info('Running the {{cookiecutter.name}} transformation.')
     try:
-        if args.ingress_time and args.ingress_time != '':
-            ingress_time = datetime.strptime(args.ingress_time, '%Y-%m-%dT%H')
-            pipeline.transform(ingress_time)
-        else:
-            pipeline.transform()
+        pipeline.transform()
     except Exception as error:  # noqa pylint: disable=broad-except
         logger.error('Error occurred while running pipeline: %s', error)
         sys.exit(-1)

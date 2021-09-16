@@ -1,8 +1,6 @@
 """
 Module to handle pipeline for timeseries
 """
-from datetime import datetime
-
 import apache_beam as beam
 import apache_beam.transforms.core as beam_core
 from apache_beam.options.pipeline_options import PipelineOptions
@@ -51,7 +49,7 @@ class Transform{{cookiecutter.class_name}}:
         self.max_files = max_files
         self.prometheus_client = prometheus_client
 
-    def transform(self, ingest_time: datetime = None):
+    def transform(self):
         """
         TODO: add appropriate docstring
         """
@@ -75,7 +73,6 @@ class Transform{{cookiecutter.class_name}}:
         while True:
 
             file_batch_controller = FileBatchController(dataset=dataset_source,
-                                                        ingest_time=ingest_time,
                                                         max_files=self.max_files)
 
             datalake_connector = DatalakeFileSource(dataset=dataset_source,
@@ -93,6 +90,3 @@ class Transform{{cookiecutter.class_name}}:
                 )
 
             file_batch_controller.save_state()
-
-            if ingest_time:
-                break
