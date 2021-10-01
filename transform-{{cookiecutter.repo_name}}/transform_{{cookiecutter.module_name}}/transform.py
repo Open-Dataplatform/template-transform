@@ -1,6 +1,8 @@
 """
 Module to handle pipeline for timeseries
 """
+import logging
+
 import apache_beam as beam
 import apache_beam.transforms.core as beam_core
 from apache_beam.options.pipeline_options import PipelineOptions
@@ -10,6 +12,9 @@ from osiris.pipelines.azure_data_storage import Dataset
 from osiris.pipelines.file_io_connector import DatalakeFileSource, FileBatchController
 from osiris.core.azure_client_authorization import ClientAuthorization
 from osiris.core.io import PrometheusClient
+
+
+logger = logging.getLogger(__file__)
 
 
 class Transform{{cookiecutter.class_name}}:
@@ -71,6 +76,7 @@ class Transform{{cookiecutter.class_name}}:
                                       prometheus_client=self.prometheus_client)
 
         while True:
+            logger.info('{{cookiecutter.name}}.transform: while - init datalake_connector')
 
             file_batch_controller = FileBatchController(dataset=dataset_source,
                                                         max_files=self.max_files)
@@ -90,3 +96,4 @@ class Transform{{cookiecutter.class_name}}:
                 )
 
             file_batch_controller.save_state()
+            logger.info('{{cookiecutter.name}}.transform: beam-pipeline finished')

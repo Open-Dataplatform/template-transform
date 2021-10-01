@@ -2,20 +2,20 @@
 TODO: add appropriate docstring
 """
 import sys
+import logging
+import logging.config
+from configparser import ConfigParser
 
-from osiris.core.configuration import ConfigurationWithCredentials
 from osiris.core.enums import TimeResolution
 from osiris.core.io import PrometheusClient
 
 from .transform import Transform{{cookiecutter.class_name}}
 
-configuration = ConfigurationWithCredentials(__file__)
-config = configuration.get_config()
-credentials_config = configuration.get_credentials_config()
-logger = configuration.get_logger()
+
+logger = logging.getLogger(__file__)
 
 
-def __get_pipeline() -> Transform{{cookiecutter.class_name}}:
+def __get_pipeline(config, credentials_config) -> Transform{{cookiecutter.class_name}}:
     account_url = config['Azure Storage']['account_url']
     filesystem_name = config['Azure Storage']['filesystem_name']
 
@@ -55,6 +55,14 @@ def main():
     """
     The main function which runs the transformation.
     """
+    config = ConfigParser()
+    config.read(['conf.ini', '/etc/osiris/conf.ini'])
+    credentials_config = ConfigParser()
+    credentials_config.read(['credentials.ini', '/vault/secrets/credentials.ini'])
+
+    logging.config.fileConfig(fname=config['Logging']['configuration_file'],  # type: ignore
+                              disable_existing_loggers=False)
+
     pipeline = __get_pipeline()
     logger.info('Running the {{cookiecutter.name}} transformation.')
     try:
