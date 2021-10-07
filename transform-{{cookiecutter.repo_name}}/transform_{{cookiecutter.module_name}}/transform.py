@@ -9,6 +9,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 
 from osiris.core.enums import TimeResolution
 from osiris.pipelines.azure_data_storage import Dataset
+from osiris.core.instrumentation import TracerClass, TracerConfig, TracerDoFn
 from osiris.pipelines.file_io_connector import DatalakeFileSource, FileBatchController
 from osiris.core.azure_client_authorization import ClientAuthorization
 from osiris.core.io import PrometheusClient
@@ -26,6 +27,7 @@ class Transform{{cookiecutter.class_name}}:
     def __init__(self, storage_account_url: str, filesystem_name: str, tenant_id: str, client_id: str,
                  client_secret: str, source_dataset_guid: str, destination_dataset_guid: str,
                  time_resolution: TimeResolution, max_files: int,
+                 tracer_config: TracerConfig,
                  prometheus_client: PrometheusClient):
         """
         :param storage_account_url: The URL to Azure storage account.
@@ -37,6 +39,7 @@ class Transform{{cookiecutter.class_name}}:
         :param destination_dataset_guid: The GUID for the destination dataset.
         :param time_resolution: The time resolution to store the data in the destination dataset with.
         :param max_files: Number of files to process in every pipeline run.
+        :param tracer_config: Configuration of Jaeger Tracer
         :param prometheus_client: Prometheus Client to generate metrics
        """
         if None in [storage_account_url, filesystem_name, tenant_id, client_id, client_secret, source_dataset_guid,
@@ -52,12 +55,15 @@ class Transform{{cookiecutter.class_name}}:
         self.destination_dataset_guid = destination_dataset_guid
         self.time_resolution = time_resolution
         self.max_files = max_files
+        self.tracer_config = tracer_config
         self.prometheus_client = prometheus_client
 
     def transform(self):
         """
         TODO: add appropriate docstring
         """
+        logger.info('Initializing {{cookiecutter.class_name}}.transform')
+        tracer = TracerClass(self.tracer_config)
 
         client_auth = ClientAuthorization(tenant_id=self.tenant_id,
                                           client_id=self.client_id,
@@ -75,25 +81,32 @@ class Transform{{cookiecutter.class_name}}:
                                       guid=self.destination_dataset_guid,
                                       prometheus_client=self.prometheus_client)
 
-        while True:
-            logger.info('{{cookiecutter.name}}.transform: while - init datalake_connector')
+        file_batch_controller = FileBatchController(dataset=dataset_source,
+                                                    max_files=self.max_files)
 
-            file_batch_controller = FileBatchController(dataset=dataset_source,
-                                                        max_files=self.max_files)
+        while file_batch_controller.more_files_to_process():
+            logger.info('{{cookiecutter.name}}.transform: start batch')
 
-            datalake_connector = DatalakeFileSource(dataset=dataset_source,
-                                                    file_paths=file_batch_controller.get_batch())
+            with tracer.start_span('Batch') as span:
+                carrier_ctx = tracer.get_carrier(span)
 
-            if datalake_connector.estimate_size() == 0:
-                break
+                paths = file_batch_controller.get_batch()
+                for path in paths:
+                    span.set_tag('path', path)
 
-            with beam.Pipeline(options=PipelineOptions(['--runner=DirectRunner'])) as pipeline:
-                _ = (
-                        pipeline  # noqa
-                        | 'read from filesystem' >> beam.io.Read(datalake_connector)  # noqa
+                datalake_connector = DatalakeFileSource(dataset=dataset_source,
+                                                        file_paths=file_batch_controller.get_batch())
 
-                        # TODO: Implement rest of the pipeline
-                )
+                with beam.Pipeline(options=PipelineOptions(['--runner=DirectRunner'])) as pipeline:
+                    _ = (
+                            pipeline  # noqa
+                            | 'read from filesystem' >> beam.io.Read(datalake_connector)  # noqa
 
-            file_batch_controller.save_state()
-            logger.info('{{cookiecutter.name}}.transform: beam-pipeline finished')
+                            # TODO: Implement rest of the pipeline
+                    )
+
+                logger.info('{{cookiecutter.name}}.transform: batch processed and saving state')
+                file_batch_controller.save_state()
+
+        tracer.close()
+        logger.info('TransformIngestTime2EventTime.transform: Finished')

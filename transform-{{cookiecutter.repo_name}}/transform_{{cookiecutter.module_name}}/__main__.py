@@ -8,6 +8,7 @@ from configparser import ConfigParser
 
 from osiris.core.enums import TimeResolution
 from osiris.core.io import PrometheusClient
+from osiris.core.instrumentation import TracerConfig
 
 from .transform import Transform{{cookiecutter.class_name}}
 
@@ -28,12 +29,13 @@ def __get_pipeline(config, credentials_config) -> Transform{{cookiecutter.class_
     time_resolution = TimeResolution[config['Datasets']['time_resolution']]
     max_files = int(config['Pipeline']['max_files'])
 
-    prometheus_hostname = config['Prometheus']['hostname']
-    prometheus_environment = config['Prometheus']['environment']
-    prometheus_name = config['Prometheus']['name']
-    prometheus_client = PrometheusClient(environment=prometheus_environment,
-                                         name=prometheus_name,
-                                         hostname=prometheus_hostname)
+    tracer_config = TracerConfig(config['Jaeger Agent']['name'],
+                                 config['Jaeger Agent']['reporting_host'],
+                                 config['Jaeger Agent']['reporting_port'])
+
+    prometheus_client = PrometheusClient(environment=config['Prometheus']['environment'],
+                                         name=config['Prometheus']['name'],
+                                         hostname=config['Prometheus']['hostname'])
 
     try:
         return Transform{{cookiecutter.class_name}}(storage_account_url=account_url,
@@ -45,6 +47,7 @@ def __get_pipeline(config, credentials_config) -> Transform{{cookiecutter.class_
                                destination_dataset_guid=destination,
                                time_resolution=time_resolution,
                                max_files=max_files,
+                               tracer_config=tracer_config,
                                prometheus_client=prometheus_client)
     except Exception as error:  # noqa pylint: disable=broad-except
         logger.error('Error occurred while initializing pipeline: %s', error)
