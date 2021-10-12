@@ -66,7 +66,7 @@ def main():
     logging.config.fileConfig(fname=config['Logging']['configuration_file'],  # type: ignore
                               disable_existing_loggers=False)
 
-    pipeline = __get_pipeline()
+    pipeline = __get_pipeline(config=config, credentials_config=credentials_config)
     logger.info('Running the {{cookiecutter.name}} transformation.')
     try:
         pipeline.transform()
