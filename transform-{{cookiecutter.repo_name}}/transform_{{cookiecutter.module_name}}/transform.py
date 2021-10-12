@@ -26,9 +26,7 @@ class Transform{{cookiecutter.class_name}}:
     # pylint: disable=too-many-arguments, too-many-instance-attributes, too-few-public-methods
     def __init__(self, storage_account_url: str, filesystem_name: str, tenant_id: str, client_id: str,
                  client_secret: str, source_dataset_guid: str, destination_dataset_guid: str,
-                 time_resolution: TimeResolution, max_files: int,
-                 tracer_config: TracerConfig,
-                 prometheus_client: PrometheusClient):
+                 max_files: int, tracer_config: TracerConfig, prometheus_client: PrometheusClient):
         """
         :param storage_account_url: The URL to Azure storage account.
         :param filesystem_name: The name of the filesystem.
@@ -37,13 +35,12 @@ class Transform{{cookiecutter.class_name}}:
         :param client_secret: The client secret string.
         :param source_dataset_guid: The GUID for the source dataset.
         :param destination_dataset_guid: The GUID for the destination dataset.
-        :param time_resolution: The time resolution to store the data in the destination dataset with.
         :param max_files: Number of files to process in every pipeline run.
         :param tracer_config: Configuration of Jaeger Tracer
         :param prometheus_client: Prometheus Client to generate metrics
        """
         if None in [storage_account_url, filesystem_name, tenant_id, client_id, client_secret, source_dataset_guid,
-                    destination_dataset_guid, time_resolution, max_files]:
+                    destination_dataset_guid, max_files]:
             raise TypeError
 
         self.storage_account_url = storage_account_url
@@ -53,7 +50,6 @@ class Transform{{cookiecutter.class_name}}:
         self.client_secret = client_secret
         self.source_dataset_guid = source_dataset_guid
         self.destination_dataset_guid = destination_dataset_guid
-        self.time_resolution = time_resolution
         self.max_files = max_files
         self.tracer_config = tracer_config
         self.prometheus_client = prometheus_client

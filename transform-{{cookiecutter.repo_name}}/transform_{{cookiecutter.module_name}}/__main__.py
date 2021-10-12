@@ -26,7 +26,6 @@ def __get_pipeline(config, credentials_config) -> Transform{{cookiecutter.class_
 
     source = config['Datasets']['source']
     destination = config['Datasets']['destination']
-    time_resolution = TimeResolution[config['Datasets']['time_resolution']]
     max_files = int(config['Pipeline']['max_files'])
 
     tracer_config = TracerConfig(config['Jaeger Agent']['name'],
@@ -45,7 +44,6 @@ def __get_pipeline(config, credentials_config) -> Transform{{cookiecutter.class_
                                client_secret=client_secret,
                                source_dataset_guid=source,
                                destination_dataset_guid=destination,
-                               time_resolution=time_resolution,
                                max_files=max_files,
                                tracer_config=tracer_config,
                                prometheus_client=prometheus_client)
