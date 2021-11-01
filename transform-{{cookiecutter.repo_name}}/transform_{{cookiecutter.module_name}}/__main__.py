@@ -1,7 +1,6 @@
 """
 TODO: add appropriate docstring
 """
-import sys
 import logging
 import logging.config
 from configparser import ConfigParser
@@ -36,20 +35,16 @@ def __get_pipeline(config, credentials_config) -> Transform{{cookiecutter.class_
                                          name=config['Prometheus']['name'],
                                          hostname=config['Prometheus']['hostname'])
 
-    try:
-        return Transform{{cookiecutter.class_name}}(storage_account_url=account_url,
-                               filesystem_name=filesystem_name,
-                               tenant_id=tenant_id,
-                               client_id=client_id,
-                               client_secret=client_secret,
-                               source_dataset_guid=source,
-                               destination_dataset_guid=destination,
-                               max_files=max_files,
-                               tracer_config=tracer_config,
-                               prometheus_client=prometheus_client)
-    except Exception as error:  # noqa pylint: disable=broad-except
-        logger.error('Error occurred while initializing pipeline: %s', error)
-        sys.exit(-1)
+    return Transform{{cookiecutter.class_name}}(storage_account_url=account_url,
+                           filesystem_name=filesystem_name,
+                           tenant_id=tenant_id,
+                           client_id=client_id,
+                           client_secret=client_secret,
+                           source_dataset_guid=source,
+                           destination_dataset_guid=destination,
+                           max_files=max_files,
+                           tracer_config=tracer_config,
+                           prometheus_client=prometheus_client)
 
 
 def main():
@@ -66,11 +61,8 @@ def main():
 
     pipeline = __get_pipeline(config=config, credentials_config=credentials_config)
     logger.info('Running the {{cookiecutter.name}} transformation.')
-    try:
-        pipeline.transform()
-    except Exception as error:  # noqa pylint: disable=broad-except
-        logger.error('Error occurred while running pipeline: %s', error)
-        sys.exit(-1)
+
+    pipeline.transform()
 
     logger.info('Finished running the {{cookiecutter.name}} transformation.')
 
