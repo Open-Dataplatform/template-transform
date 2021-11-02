@@ -3,6 +3,7 @@ TODO: add appropriate docstring
 """
 import logging
 import logging.config
+import argparse
 from configparser import ConfigParser
 
 from osiris.core.enums import TimeResolution
@@ -13,6 +14,23 @@ from .transform import Transform{{cookiecutter.class_name}}
 
 
 logger = logging.getLogger(__file__)
+
+
+def __init_argparse() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description='Transform {{cookiecutter.class_name}} from ingress to event time \
+                                                 on the configured time resolution')
+
+    parser.add_argument('--conf',
+                        nargs='+',
+                        default=['conf.ini', '/etc/osiris/conf.ini'],
+                        help='setting the configuration file')
+    parser.add_argument('--credentials',
+                        nargs='+',
+                        default=['credentials.ini', '/vault/secrets/credentials.ini'],
+                        help='setting the credential file')
+
+    return parser
+
 
 
 def __get_pipeline(config, credentials_config) -> Transform{{cookiecutter.class_name}}:
@@ -51,17 +69,26 @@ def main():
     """
     The main function which runs the transformation.
     """
+    arg_parser = __init_argparse()
+    args, _ = arg_parser.parse_known_args()
+
     config = ConfigParser()
-    config.read(['conf.ini', '/etc/osiris/conf.ini'])
+    config.read(args.conf)
     credentials_config = ConfigParser()
-    credentials_config.read(['credentials.ini', '/vault/secrets/credentials.ini'])
+    credentials_config.read(args.credentials)
 
     logging.config.fileConfig(fname=config['Logging']['configuration_file'],  # type: ignore
                               disable_existing_loggers=False)
 
-    pipeline = __get_pipeline(config=config, credentials_config=credentials_config)
+    # To disable azure INFO logging from Azure
+    if config.has_option('Logging', 'disable_logger_labels'):
+        disable_logger_labels = config['Logging']['disable_logger_labels'].splitlines()
+        for logger_label in disable_logger_labels:
+            logging.getLogger(logger_label).setLevel(logging.WARNING)
+
     logger.info('Running the {{cookiecutter.name}} transformation.')
 
+    pipeline = __get_pipeline(config=config, credentials_config=credentials_config)
     pipeline.transform()
 
     logger.info('Finished running the {{cookiecutter.name}} transformation.')
