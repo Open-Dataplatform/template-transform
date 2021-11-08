@@ -134,3 +134,4 @@ credentials.ini
 
 # IDE
 .idea/
+.vscode/
