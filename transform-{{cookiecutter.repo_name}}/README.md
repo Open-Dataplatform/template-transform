@@ -15,7 +15,7 @@ TODO
 
 ### Usage
 ```sh
-$ python -m transform_{{cookiecutter.module_name}}.transform [--ingresss_time %Y-%m-%dT%H']
+$ python -m transform_{{cookiecutter.module_name}}.transform [--ingress_time %Y-%m-%dT%H']
 ```
 
 ## Configuration
