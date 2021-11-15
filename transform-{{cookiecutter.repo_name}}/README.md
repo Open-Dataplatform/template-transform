@@ -1,4 +1,4 @@
-# ingress-adapter-{{cookiecutter.repo_name}} <!-- omit in toc -->
+# transform-{{cookiecutter.repo_name}} <!-- omit in toc -->
 - [Introduction](#introduction)
 - [Configuration](#configuration)
   - [Logging](#logging)
